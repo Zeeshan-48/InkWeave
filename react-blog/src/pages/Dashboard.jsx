@@ -151,16 +151,18 @@ const Dashboard = () => {
                                         const likesList = post.likes || post.Likes || post.like || [];
 
                                         return (
-                                            <tr key={post.$id} className="hover:bg-slate-50/50 dark:hover:bg-slate-850/20 transition-colors">
+                                            <tr key={post.$id} className="group hover:bg-slate-50/70 dark:hover:bg-slate-800/30 transition-all duration-300">
                                                 <td className="px-6 py-4">
-                                                    <img
-                                                        src={imageUrl}
-                                                        alt={post.title}
-                                                        className="w-12 h-8 rounded-lg object-cover border border-slate-100 dark:border-slate-850"
-                                                        onError={(e) => e.target.src = FALLBACK_BLOG_IMAGE}
-                                                    />
+                                                    <div className="w-12 h-8 rounded-lg overflow-hidden border border-slate-100 dark:border-slate-850">
+                                                        <img
+                                                            src={imageUrl}
+                                                            alt={post.title}
+                                                            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                                                            onError={(e) => e.target.src = FALLBACK_BLOG_IMAGE}
+                                                        />
+                                                    </div>
                                                 </td>
-                                                <td className="px-6 py-4 font-bold text-slate-800 dark:text-slate-100 line-clamp-1 max-w-60 pt-6">
+                                                <td className="px-6 py-4 font-bold text-slate-800 dark:text-slate-100 line-clamp-1 max-w-60 pt-6 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors duration-300">
                                                     {post.title}
                                                 </td>
                                                 <td className="px-6 py-4">
