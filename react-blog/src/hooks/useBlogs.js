@@ -45,6 +45,27 @@ export const useBlogs = () => {
         }
     }, [dispatch]);
 
+    const fetchUserPosts = useCallback(async (userId) => {
+        dispatch(setPostsStart());
+        try {
+            let res;
+            try {
+                res = await blogService.getAllPosts([Query.equal("userID", userId)]);
+            } catch (err) {
+                if (err.message && err.message.includes("Attribute not found")) {
+                    res = await blogService.getAllPosts([Query.equal("userId", userId)]);
+                } else {
+                    throw err;
+                }
+            }
+            dispatch(setPostsSuccess(res.documents || []));
+            return res.documents;
+        } catch (err) {
+            dispatch(setPostsFailure(err?.message || "Failed to load blogs."));
+            return [];
+        }
+    }, [dispatch]);
+
     const createBlogPost = async ({ title, content, status, imageFile }) => {
         setActionLoading(true);
         try {
@@ -174,6 +195,7 @@ export const useBlogs = () => {
         postsPerPage,
         fetchPosts,
         fetchAllPostsAdmin,
+        fetchUserPosts,
         createBlogPost,
         updateBlogPost,
         deleteBlogPost,

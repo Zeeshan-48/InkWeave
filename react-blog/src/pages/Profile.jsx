@@ -6,14 +6,17 @@ import BlogCard from '../components/BlogCard';
 
 const Profile = () => {
     const { user } = useAuth();
-    const { posts, fetchPosts } = useBlogs();
+    const { posts, fetchUserPosts } = useBlogs();
 
     useEffect(() => {
-        fetchPosts();
-    }, [fetchPosts]);
+        if (user?.$id) {
+            fetchUserPosts(user.$id);
+        }
+    }, [fetchUserPosts, user?.$id]);
 
     // Filter posts written by the logged-in user
     const myPosts = posts.filter(post => (post.userID || post.userId) === user?.$id);
+    const publishedPosts = myPosts.filter(post => post.status === 'active');
 
     // Sum up total likes on my posts
     const totalLikes = myPosts.reduce((sum, post) => {
@@ -88,7 +91,7 @@ const Profile = () => {
                         </Link>
                     </div>
 
-                    {myPosts.length === 0 ? (
+                    {publishedPosts.length === 0 ? (
                         <div className="text-center py-20 bg-white dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800/50 rounded-2xl space-y-4">
                             <p className="text-slate-500 dark:text-slate-450 font-medium">
                                 You haven't published any articles yet.
@@ -102,7 +105,7 @@ const Profile = () => {
                         </div>
                     ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                            {myPosts.map((post) => (
+                            {publishedPosts.map((post) => (
                                 <BlogCard key={post.$id} post={post} />
                             ))}
                         </div>

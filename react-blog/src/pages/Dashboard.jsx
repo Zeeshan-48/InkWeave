@@ -8,12 +8,14 @@ import { FALLBACK_BLOG_IMAGE } from '../utils/constants';
 
 const Dashboard = () => {
     const { user } = useAuth();
-    const { posts, loading, fetchPosts, deleteBlogPost } = useBlogs();
+    const { posts, loading, fetchUserPosts, updateBlogPost, deleteBlogPost } = useBlogs();
     const [actionLoading, setActionLoading] = useState(false);
 
     useEffect(() => {
-        fetchPosts();
-    }, [fetchPosts]);
+        if (user?.$id) {
+            fetchUserPosts(user.$id);
+        }
+    }, [fetchUserPosts, user?.$id]);
 
     const myPosts = posts.filter(post => (post.userID || post.userId) === user?.$id);
     const activePostsCount = myPosts.filter(p => p.status === 'active').length;
@@ -33,6 +35,25 @@ const Dashboard = () => {
         }
     };
 
+    const handleToggleStatus = async (postItem) => {
+        setActionLoading(true);
+        try {
+            const nextStatus = postItem.status === 'active' ? 'inactive' : 'active';
+            const imgId = postItem.featuredImage || postItem.featuredimage || postItem.image;
+            await updateBlogPost(postItem.$id, {
+                title: postItem.title,
+                content: postItem.content,
+                status: nextStatus,
+                oldImageId: imgId
+            });
+        } catch (err) {
+            console.error("Dashboard :: Toggle status failed", err);
+            alert("Failed to update status.");
+        } finally {
+            setActionLoading(false);
+        }
+    };
+
     if (loading) {
         return <Loader text="Loading your dashboard panel..." />;
     }
@@ -47,13 +68,13 @@ const Dashboard = () => {
                         <h1 className="text-3xl font-extrabold tracking-tight">
                             Writer Dashboard
                         </h1>
-                        <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">
+                        <p className="text-sm text-slate-550 dark:text-slate-400 font-medium">
                             Monitor, publish, edit, and moderate your personal articles.
                         </p>
                     </div>
                     <Link
                         to="/create-blog"
-                        className="px-5 py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold text-sm rounded-xl shadow-lg shadow-purple-500/10 transition-colors flex items-center gap-1.5"
+                        className="px-5 py-3 bg-purple-600 hover:bg-purple-755 text-white font-bold text-sm rounded-xl shadow-lg shadow-purple-500/10 transition-colors flex items-center gap-1.5"
                     >
                         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
@@ -127,6 +148,8 @@ const Dashboard = () => {
                                             ? storageService.getFilePreview(post.featuredImage) 
                                             : FALLBACK_BLOG_IMAGE;
                                         
+                                        const likesList = post.likes || post.Likes || post.like || [];
+
                                         return (
                                             <tr key={post.$id} className="hover:bg-slate-50/50 dark:hover:bg-slate-850/20 transition-colors">
                                                 <td className="px-6 py-4">
@@ -150,9 +173,20 @@ const Dashboard = () => {
                                                     </span>
                                                 </td>
                                                 <td className="px-6 py-4 font-semibold text-slate-600 dark:text-slate-400">
-                                                    {Array.isArray(post.likes) ? post.likes.length : 0}
+                                                    {likesList.length}
                                                 </td>
                                                 <td className="px-6 py-4 text-right space-x-2">
+                                                    <button
+                                                        onClick={() => handleToggleStatus(post)}
+                                                        disabled={actionLoading}
+                                                        className={`inline-block px-3 py-1.5 text-xs font-bold rounded-lg transition-colors disabled:opacity-50 ${
+                                                            post.status === 'active'
+                                                                ? 'bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400'
+                                                                : 'bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400'
+                                                        }`}
+                                                    >
+                                                        {post.status === 'active' ? 'Draft It' : 'Go Live'}
+                                                    </button>
                                                     <Link
                                                         to={`/blog/${post.$id}`}
                                                         className="inline-block px-3 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-xs font-bold rounded-lg transition-colors"
