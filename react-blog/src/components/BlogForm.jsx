@@ -101,7 +101,7 @@ const BlogForm = ({ post }) => {
                                 <Editor
                                     id="content-editor"
                                     initialValue={post?.content || ''}
-                                    apiKey={import.meta.env.VITE_TINYMCE_API_KEY || "no-api-key"}
+                                    apiKey={import.meta.env.VITE_TINYMCE_API_KEY || "4ga9bv5rjovwvkyax0dcefng7azpapbweq38tnt952bjc16p"}
                                     init={{
                                         height: 350,
                                         menubar: false,
